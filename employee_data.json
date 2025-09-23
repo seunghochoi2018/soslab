@@ -1,0 +1,62 @@
+{
+  "Paul": {
+    "name": "Paul(윤희선)",
+    "department": "평촌",
+    "total_points": 5000
+  },
+  "L": {
+    "name": "L(류주완)",
+    "department": "평촌",
+    "total_points": 5000
+  },
+  "Sammy": {
+    "name": "Sammy(육성일)",
+    "department": "평촌",
+    "total_points": 5000
+  },
+  "Kai": {
+    "name": "Kai(윤상훈)",
+    "department": "평촌",
+    "total_points": 5000
+  },
+  "Jack": {
+    "name": "Jack(정재락)",
+    "department": "판교",
+    "total_points": 5000
+  },
+  "Anna": {
+    "name": "Anna(이한영)",
+    "department": "판교",
+    "total_points": 10000
+  },
+  "Jake": {
+    "name": "Jake(조준현)",
+    "department": "광주",
+    "total_points": 15000
+  },
+  "James": {
+    "name": "James(정우석)",
+    "department": "광주",
+    "total_points": 20000
+  },
+  "Jinie": {
+    "name": "Jinie(이효진)",
+    "department": "판교",
+    "total_points": 5000
+  },
+  "Yup": {
+    "name": "Yup(김현엽)",
+    "department": "평촌",
+    "total_points": 5000
+  },
+  "Brown": {
+    "name": "Brown(권은성)",
+    "department": "평촌",
+    "total_points": 5000
+  },
+  "Jayone": {
+    "name": "Jayone(서재원)",
+    "department": "판교",
+    "total_points": 5000
+  }
+}

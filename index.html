@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포인트 지급 현황 관리</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 초기 화면 -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-box">
+                <h2>포인트 관리 시스템</h2>
+                <div class="access-options">
+                    <button id="viewerAccessBtn" class="access-btn viewer-btn">현황 조회하기</button>
+                    <button id="adminAccessBtn" class="access-btn admin-btn">관리자 로그인</button>
+                </div>
+                
+                <!-- 관리자 로그인 폼 (기본적으로 숨겨짐) -->
+                <form id="loginForm" style="display: none;">
+                    <div class="form-group">
+                        <label for="username">관리자 ID</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">비밀번호</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit">로그인</button>
+                        <button type="button" id="cancelLoginBtn">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 메인 화면 -->
+        <div id="mainScreen" class="screen">
+            <header>
+                <h1>포인트 지급 현황 관리</h1>
+                <div class="user-info">
+                    <span id="currentUser"></span>
+                    <span id="userRole"></span>
+                    <button id="logoutBtn">로그아웃</button>
+                </div>
+            </header>
+
+            <!-- 관리자용 입력 폼 -->
+            <div id="adminPanel" class="admin-only" style="display: none;">
+                <h3>포인트 기록 추가/수정</h3>
+                <form id="pointForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accumulateDate">포인트 적립시기</label>
+                            <input type="date" id="accumulateDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="applicant">신청자</label>
+                            <input type="text" id="applicant" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="transporter">운송자</label>
+                            <input type="text" id="transporter" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="applicantAmount">신청자 적립금액</label>
+                            <input type="number" id="applicantAmount" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="transporterAmount">운송자 적립금액</label>
+                            <input type="number" id="transporterAmount" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentDate">포인트 지급시기</label>
+                            <input type="date" id="paymentDate">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taxDate">과세시기</label>
+                            <input type="date" id="taxDate">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" id="submitBtn">추가</button>
+                            <button type="button" id="cancelBtn" style="display: none;">취소</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 검색 및 필터 -->
+            <div class="search-section">
+                <div class="search-row">
+                    <input type="text" id="searchInput" placeholder="신청자, 운송자명으로 검색">
+                    <input type="date" id="dateFrom" placeholder="시작일">
+                    <input type="date" id="dateTo" placeholder="종료일">
+                    <button id="searchBtn">검색</button>
+                    <button id="resetBtn">초기화</button>
+                </div>
+            </div>
+
+            <!-- 데이터 테이블 -->
+            <div class="table-section">
+                <table id="pointTable">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>포인트 적립시기</th>
+                            <th>신청자</th>
+                            <th>운송자</th>
+                            <th>신청자 적립금액</th>
+                            <th>운송자 적립금액</th>
+                            <th>포인트 지급시기</th>
+                            <th>과세시기</th>
+                            <th class="admin-only" style="display: none;">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- 데이터가 여기에 동적으로 추가됩니다 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 통계 정보 -->
+            <div class="stats-section">
+                <div class="stat-card">
+                    <h4>총 신청자 적립금액</h4>
+                    <span id="totalApplicantAmount">0</span>
+                </div>
+                <div class="stat-card">
+                    <h4>총 운송자 적립금액</h4>
+                    <span id="totalTransporterAmount">0</span>
+                </div>
+                <div class="stat-card">
+                    <h4>총 기록 수</h4>
+                    <span id="totalRecords">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

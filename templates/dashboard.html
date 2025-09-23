@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물품 운송 현황 대시보드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .admin-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .admin-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .ranking-list {
+            list-style: none;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+        }
+
+        .ranking-item:hover {
+            transform: translateX(5px);
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+            text-transform: uppercase;
+        }
+
+        .tier-challenger {
+            background: linear-gradient(135deg, #ff0066 0%, #ff6b6b 100%);
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 0, 102, 0.4);
+        }
+
+        .tier-grandmaster {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.4);
+        }
+
+        .tier-master {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            box-shadow: 0 0 10px rgba(155, 89, 182, 0.4);
+        }
+
+        .tier-diamond {
+            background: linear-gradient(135deg, #b9f2ff 0%, #00d4ff 100%);
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+        }
+
+        .tier-platinum {
+            background: linear-gradient(135deg, #26d0ce 0%, #1a2980 100%);
+            color: white;
+            box-shadow: 0 0 10px rgba(26, 208, 206, 0.4);
+        }
+
+        .tier-gold {
+            background: linear-gradient(135deg, #ffed4e 0%, #ffa502 100%);
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 165, 2, 0.4);
+        }
+
+        .tier-silver {
+            background: linear-gradient(135deg, #f5f5f5 0%, #c0c0c0 100%);
+            color: #333;
+            box-shadow: 0 0 10px rgba(192, 192, 192, 0.4);
+        }
+
+        .tier-bronze {
+            background: linear-gradient(135deg, #cd7f32 0%, #8b4513 100%);
+            color: white;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .challenger {
+            background: linear-gradient(135deg, #ff0066 0%, #ff6b6b 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 0, 102, 0.6);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 102, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(255, 0, 102, 0.8); }
+        }
+
+        .grandmaster {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            box-shadow: 0 0 18px rgba(231, 76, 60, 0.6);
+        }
+
+        .master {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+            box-shadow: 0 0 16px rgba(155, 89, 182, 0.6);
+        }
+
+        .diamond {
+            background: linear-gradient(135deg, #b9f2ff 0%, #00d4ff 100%);
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+
+        .platinum {
+            background: linear-gradient(135deg, #26d0ce 0%, #1a2980 100%);
+            color: white;
+            box-shadow: 0 0 15px rgba(26, 208, 206, 0.5);
+        }
+
+        .gold {
+            background: linear-gradient(135deg, #ffed4e 0%, #ffa502 100%);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 165, 2, 0.5);
+        }
+
+        .silver {
+            background: linear-gradient(135deg, #f5f5f5 0%, #c0c0c0 100%);
+            color: #333;
+            box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+        }
+
+        .bronze {
+            background: linear-gradient(135deg, #cd7f32 0%, #8b4513 100%);
+            color: white;
+        }
+
+        .ranking-name {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .ranking-stats {
+            text-align: right;
+        }
+
+        .count {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .points {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .main-table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .filter-btn {
+            background-color: #27ae60;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .filter-btn:hover {
+            background-color: #219a52;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .webhook-info {
+            background: #e8f4ff;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .webhook-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c5aa0;
+        }
+
+        .webhook-example {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🚚 물품 운송 포인트 현황</h1>
+            <a href="/admin_login" class="admin-btn">🔒 관리자</a>
+        </div>
+
+        <div class="stats-container">
+            <div class="stats-card">
+                <h2 class="stats-title">📦 최다 요청자 순위</h2>
+                <ul class="ranking-list">
+                    {% for item in top_requesters %}
+                    <li class="ranking-item">
+                        <div style="display: flex; align-items: center;">
+                            <span class="rank-badge {% if item.rank == 1 %}challenger{% elif item.rank == 2 %}grandmaster{% elif item.rank == 3 %}master{% elif item.rank == 4 %}diamond{% elif item.rank <= 6 %}platinum{% elif item.rank <= 10 %}gold{% elif item.rank <= 20 %}silver{% else %}bronze{% endif %}">
+                                {% if item.display_rank %}{{ item.rank }}{% else %}={% endif %}
+                            </span>
+                            <span class="ranking-name">{{ item.name }}</span>
+                            <span class="tier-badge {% if item.rank == 1 %}tier-challenger{% elif item.rank == 2 %}tier-grandmaster{% elif item.rank == 3 %}tier-master{% elif item.rank == 4 %}tier-diamond{% elif item.rank <= 6 %}tier-platinum{% elif item.rank <= 10 %}tier-gold{% elif item.rank <= 20 %}tier-silver{% else %}tier-bronze{% endif %}">
+                                {% if item.rank == 1 %}챌린저{% elif item.rank == 2 %}그랜드마스터{% elif item.rank == 3 %}마스터{% elif item.rank == 4 %}다이아{% elif item.rank <= 6 %}플래티넘{% elif item.rank <= 10 %}골드{% elif item.rank <= 20 %}실버{% else %}브론즈{% endif %}
+                            </span>
+                        </div>
+                        <div class="ranking-stats">
+                            <div class="count">{{ item.stats.count }}건</div>
+                            <div class="points">{{ "{:,}".format(item.stats.points) }}P</div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                    {% if not top_requesters %}
+                    <li class="no-data">아직 데이터가 없습니다</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="stats-card">
+                <h2 class="stats-title">🚛 최다 전달자 순위</h2>
+                <ul class="ranking-list">
+                    {% for item in top_transporters %}
+                    <li class="ranking-item">
+                        <div style="display: flex; align-items: center;">
+                            <span class="rank-badge {% if item.rank == 1 %}challenger{% elif item.rank == 2 %}grandmaster{% elif item.rank == 3 %}master{% elif item.rank == 4 %}diamond{% elif item.rank <= 6 %}platinum{% elif item.rank <= 10 %}gold{% elif item.rank <= 20 %}silver{% else %}bronze{% endif %}">
+                                {% if item.display_rank %}{{ item.rank }}{% else %}={% endif %}
+                            </span>
+                            <span class="ranking-name">{{ item.name }}</span>
+                            <span class="tier-badge {% if item.rank == 1 %}tier-challenger{% elif item.rank == 2 %}tier-grandmaster{% elif item.rank == 3 %}tier-master{% elif item.rank == 4 %}tier-diamond{% elif item.rank <= 6 %}tier-platinum{% elif item.rank <= 10 %}tier-gold{% elif item.rank <= 20 %}tier-silver{% else %}tier-bronze{% endif %}">
+                                {% if item.rank == 1 %}챌린저{% elif item.rank == 2 %}그랜드마스터{% elif item.rank == 3 %}마스터{% elif item.rank == 4 %}다이아{% elif item.rank <= 6 %}플래티넘{% elif item.rank <= 10 %}골드{% elif item.rank <= 20 %}실버{% else %}브론즈{% endif %}
+                            </span>
+                        </div>
+                        <div class="ranking-stats">
+                            <div class="count">{{ item.stats.count }}건</div>
+                            <div class="points">{{ "{:,}".format(item.stats.points) }}P</div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                    {% if not top_transporters %}
+                    <li class="no-data">아직 데이터가 없습니다</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="webhook-info">
+            <div class="webhook-title">🚚 싣GO 받GO 이용방법 (3단계 프로세스)</div>
+
+            <div style="margin-bottom: 15px;">
+                <strong>1️⃣ 운송 요청 (/싣고받고 키워드 필수):</strong>
+                <div class="webhook-example" style="margin: 5px 0;">
+                    /싣고받고 평촌 판교 센서<br>
+                    /싣고받고 평촌 광주 노트북<br>
+                    /싣고받고 광주 평촌 ML-U<br>
+                    /싣고받고 판교 광주 서버
+                </div>
+                <small style="color: #666;">※ 형식: /싣고받고 [출발지] [도착지] [물품명]<br>
+                ※ 간단하게 공백으로 구분해서 입력하세요</small>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <strong>2️⃣ 전달 수락 (요청 글에 댓글로):</strong>
+                <div class="webhook-example" style="margin: 5px 0;">
+                    제가 전달드리겠습니다<br>
+                    제가 가져가겠습니다<br>
+                    넵 알겠습니다
+                </div>
+                <small style="color: #666;">※ 원본 요청 글에 댓글로 답변하세요</small>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <strong>3️⃣ 완료 확인:</strong>
+                <div class="webhook-example" style="margin: 5px 0;">
+                    잘 받았습니다<br>
+                    수령했습니다
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd;">
+                <strong>📍 인식 가능한 위치:</strong><br>
+                • 평촌 (제조혁신센터) • 판교 (R&D 1,2센터) • 광주 (광주본사, 광주R&D)<br><br>
+
+                <strong>💰 포인트 정책:</strong><br>
+                • 요청자: 5,000P (모든 경로)<br>
+                • 전달자: 판교↔평촌 5,000P | 광주↔판교/평촌 10,000P<br><br>
+
+                <strong>🤖 자동 알림:</strong> 요청→접수→완료 각 단계마다 봇이 알림 전송
+            </div>
+        </div>
+
+        <div class="main-table-container">
+            <div class="table-header">
+                <h2 style="font-size: 20px; color: #333;">📋 전체 운송 현황</h2>
+                <div class="filter-container">
+                    <input type="text" class="filter-input" id="searchInput" placeholder="이름 검색...">
+                    <input type="date" class="filter-input" id="dateFrom">
+                    <input type="date" class="filter-input" id="dateTo">
+                    <button class="filter-btn" onclick="filterRecords()">검색</button>
+                    <button class="filter-btn" onclick="resetFilter()">초기화</button>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>요청일</th>
+                        <th>요청자</th>
+                        <th>전달자</th>
+                        <th>경로</th>
+                        <th>물품</th>
+                        <th>요청자P</th>
+                        <th>전달자P</th>
+                        <th>상태</th>
+                        <th>완료일</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsTable">
+                    {% for record in records %}
+                    <tr>
+                        <td>{{ record.request_date }}</td>
+                        <td>{{ record.applicant }}</td>
+                        <td>{{ record.transporter or '-' }}</td>
+                        <td>{{ record.from_location }} → {{ record.to_location }}</td>
+                        <td>{{ record.item }}</td>
+                        <td>{{ "{:,}".format(record.applicant_amount) }}</td>
+                        <td>{{ "{:,}".format(record.transporter_amount) }}</td>
+                        <td>
+                            <span class="status-badge {% if record.status == '완료' %}status-completed{% else %}status-pending{% endif %}">
+                                {{ record.status }}
+                            </span>
+                        </td>
+                        <td>{{ record.accumulate_date or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if not records %}
+            <div class="no-data">
+                아직 운송 기록이 없습니다.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        let allRecords = {{ records | tojson }};
+
+        function filterRecords() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            fetch(`/api/records?search=${search}&date_from=${dateFrom}&date_to=${dateTo}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateTable(data);
+                });
+        }
+
+        function resetFilter() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            updateTable(allRecords);
+        }
+
+        function updateTable(records) {
+            const tbody = document.getElementById('recordsTable');
+            tbody.innerHTML = '';
+
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="no-data">검색 결과가 없습니다.</td></tr>';
+                return;
+            }
+
+            records.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.request_date}</td>
+                    <td>${record.applicant}</td>
+                    <td>${record.transporter || '-'}</td>
+                    <td>${record.from_location} → ${record.to_location}</td>
+                    <td>${record.item}</td>
+                    <td>${record.applicant_amount.toLocaleString()}</td>
+                    <td>${record.transporter_amount.toLocaleString()}</td>
+                    <td>
+                        <span class="status-badge ${record.status === '완료' ? 'status-completed' : 'status-pending'}">
+                            ${record.status}
+                        </span>
+                    </td>
+                    <td>${record.accumulate_date || '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 5초마다 데이터 새로고침
+        setInterval(() => {
+            fetch('/api/records')
+                .then(response => response.json())
+                .then(data => {
+                    allRecords = data;
+                    updateTable(data);
+                });
+        }, 5000);
+    </script>
+</body>
+</html>

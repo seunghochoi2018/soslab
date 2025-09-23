@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포인트 지급 현황 관리</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 350px;
+        }
+
+        .title {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .access-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .access-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+        }
+
+        .viewer-btn {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .viewer-btn:hover {
+            background-color: #219a52;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .admin-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .admin-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .description {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1 class="title">포인트 관리 시스템</h1>
+        <div class="access-options">
+            <a href="/viewer" class="access-btn viewer-btn">현황 조회하기</a>
+            <a href="/admin_login" class="access-btn admin-btn">관리자 로그인</a>
+        </div>
+        <div class="description">
+            <p>조회자는 비밀번호 없이 현황을 확인할 수 있습니다.</p>
+            <p>관리자는 로그인 후 데이터를 추가/수정/삭제할 수 있습니다.</p>
+        </div>
+    </div>
+</body>
+</html>
