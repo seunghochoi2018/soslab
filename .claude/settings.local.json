@@ -14,7 +14,14 @@
       "Bash(dir:*)",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote remove:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []
