@@ -113,19 +113,33 @@ def send_jandi_notification(title, message, color="#00d4ff"):
 
 def calculate_points(from_location, to_location):
     """경로에 따른 포인트 계산"""
-    # 판교<->평촌: 5000원
-    # 광주<->판교, 광주<->평촌: 10000원
-    route = f"{from_location}-{to_location}"
+    # 지역 그룹 정의
+    수도권 = ['평촌', '판교']
+    광주권 = ['광주본사', '광주R&D']
 
-    short_routes = ["판교-평촌", "평촌-판교"]
-    long_routes = ["광주-평촌", "평촌-광주", "광주-판교", "판교-광주"]
+    # 출발지와 도착지의 지역 확인
+    from_region = None
+    to_region = None
 
-    if route in short_routes:
-        return 5000, 5000  # 요청자, 전달자
-    elif route in long_routes:
-        return 5000, 10000  # 요청자, 전달자
+    if from_location in 수도권:
+        from_region = '수도권'
+    elif from_location in 광주권:
+        from_region = '광주권'
+
+    if to_location in 수도권:
+        to_region = '수도권'
+    elif to_location in 광주권:
+        to_region = '광주권'
+
+    # 포인트 계산: 요청자는 항상 5000P, 전달자는 지역에 따라
+    applicant_points = 5000
+
+    if from_region == to_region:
+        transporter_points = 5000  # 같은 지역 내
     else:
-        return 5000, 5000  # 기본값
+        transporter_points = 10000  # 다른 지역으로
+
+    return applicant_points, transporter_points
 
 def parse_chat_message(message):
     """채팅 메시지에서 운송 정보 추출"""
