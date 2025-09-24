@@ -335,8 +335,9 @@ def webhook():
 
         print(f"[DEBUG] 파싱된 JSON: {webhook_data}")
 
-        message = webhook_data.get('message', '')
-        sender = webhook_data.get('sender', webhook_data.get('writer_name', '익명'))
+        # 잔디 웹훅 데이터 구조에 맞게 수정
+        message = webhook_data.get('data', webhook_data.get('text', webhook_data.get('message', '')))
+        sender = webhook_data.get('writerName', webhook_data.get('writer_name', webhook_data.get('sender', '익명')))
         timestamp = webhook_data.get('timestamp', datetime.now().isoformat())
 
         print(f"[DEBUG] 메시지: {message}")
