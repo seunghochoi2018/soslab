@@ -138,20 +138,29 @@ def parse_chat_message(message):
 
     from_loc = None
     to_loc = None
+    from_text = None
+    to_text = None
 
-    # 새로운 간단한 형식 처리: /싣고받고 [출발지] [도착지] [물품명]
+    # 새로운 간단한 형식 처리: /싣고받고 [출발지] [도착지] [물품명] 또는 [출발지] [도착지] [물품명]
     if message.strip().startswith('/싣고받고'):
         parts = message.strip().split()
         if len(parts) >= 3:  # /싣고받고 출발지 도착지 (물품명은 선택사항)
             from_text = parts[1]
             to_text = parts[2]
+    else:
+        # 잔디 웹훅에서 data 필드로 오는 경우: "평촌 판교 센서"
+        parts = message.strip().split()
+        if len(parts) >= 2:  # 출발지 도착지 (물품명은 선택사항)
+            from_text = parts[0]
+            to_text = parts[1]
 
-            # 위치 정규화
-            for key, values in locations.items():
-                if any(v in from_text for v in values):
-                    from_loc = key
-                if any(v in to_text for v in values):
-                    to_loc = key
+    # 위치 정규화
+    if from_text and to_text:
+        for key, values in locations.items():
+            if any(v in from_text for v in values):
+                from_loc = key
+            if any(v in to_text for v in values):
+                to_loc = key
     else:
         # 기존 복잡한 패턴들 (하위 호환성)
         patterns = [
