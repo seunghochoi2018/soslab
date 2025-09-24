@@ -129,6 +129,8 @@ def calculate_points(from_location, to_location):
 
 def parse_chat_message(message):
     """채팅 메시지에서 운송 정보 추출"""
+    print(f"[DEBUG] parse_chat_message 시작: '{message}'")
+
     # 위치 패턴
     locations = {
         '평촌': ['평촌', '제조혁신센터'],
@@ -156,13 +158,19 @@ def parse_chat_message(message):
 
     # 위치 정규화
     if from_text and to_text:
+        print(f"[DEBUG] from_text: '{from_text}', to_text: '{to_text}'")
         for key, values in locations.items():
             if any(v in from_text for v in values):
                 from_loc = key
+                print(f"[DEBUG] from_loc 찾음: {key}")
             if any(v in to_text for v in values):
                 to_loc = key
+                print(f"[DEBUG] to_loc 찾음: {key}")
     else:
-        # 기존 복잡한 패턴들 (하위 호환성)
+        print(f"[DEBUG] from_text 또는 to_text가 없음: from_text='{from_text}', to_text='{to_text}'")
+
+    # 위에서 찾지 못했다면 기존 복잡한 패턴들 시도 (하위 호환성)
+    if not from_loc or not to_loc:
         patterns = [
             r'(평촌|판교|광주)[\s]*[→>-]+[\s]*(평촌|판교|광주)',
             r'(평촌|판교|광주)[\s]*--+>[\s]*(평촌|판교|광주)',
