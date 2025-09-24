@@ -6,16 +6,16 @@
 3. "Create a Beginner account" 선택 (무료)
 4. 사용자명, 이메일, 비밀번호 입력
 
-## 2. 파일 업로드
+## 2. 파일 업로드 (ZIP 파일 사용)
 1. 대시보드에서 "Files" 탭 클릭
-2. "mysite" 폴더 생성
-3. 다음 파일들 업로드:
-   - server.py
-   - requirements.txt
-   - point_data.json
-   - employee_data.json
-   - templates/ 폴더 전체
-   - static/ 폴더 (있다면)
+2. "Upload a file" 버튼으로 `deploy.zip` 업로드
+3. "Consoles" 탭에서 "Bash" 콘솔 열기
+4. 다음 명령어로 압축 해제:
+```bash
+unzip deploy.zip -d mysite
+cd mysite
+ls -la  # 파일 확인
+```
 
 ## 3. 콘솔에서 패키지 설치
 1. "Consoles" 탭 클릭
