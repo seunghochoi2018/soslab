@@ -194,17 +194,15 @@ def parse_chat_message(message):
             except ValueError:
                 pass
 
-        # 기존 운송 요청 패턴: /싣고받고 출발지 도착지 물품명 [@수령자]
-        elif len(parts) >= 3:  # /싣고받고 출발지 도착지 (물품명, @수령자는 선택사항)
+        # 기존 운송 요청 패턴: /싣고받고 출발지 도착지 물품명 [수령자]
+        elif len(parts) >= 3:  # /싣고받고 출발지 도착지 (물품명, 수령자는 선택사항)
             from_text = parts[1]
             to_text = parts[2]
 
-            # @수령자 정보 추출
+            # 수령자 정보 추출 (@ 없이, 5번째 파라미터)
             recipient = None
-            for part in parts[3:]:
-                if part.startswith('@'):
-                    recipient = part[1:]  # @ 제거
-                    break
+            if len(parts) >= 5:  # /싣고받고 출발지 도착지 물품명 수령자
+                recipient = parts[4]
     else:
         # 잔디 웹훅에서 data 필드로 오는 경우: "평촌 판교 센서"
         parts = message.strip().split()
@@ -281,11 +279,12 @@ def parse_chat_message(message):
     name_pattern = r'@?([A-Za-z]+)\([가-힣]+\)'
     names = re.findall(name_pattern, message)
 
-    # @수령자 정보 추출 (메시지 전체에서)
+    # 수령자 정보 추출 (메시지 전체에서, @ 없이)
     recipient = None
-    recipient_match = re.search(r'@([A-Za-z]+)', message)
-    if recipient_match:
-        recipient = recipient_match.group(1)
+    # /싣고받고 형식이 아닌 경우에만 전체 메시지에서 추출
+    if not message.strip().startswith('/싣고받고'):
+        # 기존 방식에서는 수령자 정보 추출하지 않음
+        pass
 
     return {
         'from_location': from_loc,
@@ -457,15 +456,11 @@ def webhook():
             # 물품명 추출
             item = '물품'
 
-            # /싣고받고 형식의 경우 세 번째 파라미터가 물품명, 네 번째 이후에 @수령자 가능
+            # /싣고받고 형식의 경우: /싣고받고 출발지 도착지 물품명 [수령자]
             if message.strip().startswith('/싣고받고'):
                 parts = message.strip().split()
                 if len(parts) >= 4:
-                    # @수령자가 아닌 첫 번째 항목이 물품명
-                    for part in parts[3:]:
-                        if not part.startswith('@'):
-                            item = part
-                            break
+                    item = parts[3]  # 세 번째 파라미터가 물품명
                 elif len(parts) == 3:  # 물품명이 없는 경우
                     item = '물품'
             else:
