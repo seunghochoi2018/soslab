@@ -432,11 +432,11 @@ def webhook():
             data.append(new_record)
             save_data(data)
 
-            # 잔디 알림 전송
+            # 잔디 알림 전송 (간단한 확인 메시지)
             send_jandi_notification(
-                "📦 요청완료!",
-                f"🚚 새로운 운송 요청이 등록되었습니다\n\n요청자: {sender}\n경로: {parsed['from_location']} → {parsed['to_location']}\n물품: {item}\n예상 포인트: {applicant_points:,}P / {transporter_points:,}P\n\n전달해주실 분을 기다립니다!",
-                "#3498db"
+                "✅ 접수완료",
+                f"📋 **#{new_record['id']}번** {parsed['from_location']}→{parsed['to_location']} {item} | {applicant_points:,}P",
+                "#27ae60"
             )
 
             return jsonify({'success': True, 'action': 'request_created', 'record': new_record})
