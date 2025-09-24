@@ -194,10 +194,17 @@ def parse_chat_message(message):
             except ValueError:
                 pass
 
-        # 기존 운송 요청 패턴: /싣고받고 출발지 도착지 물품명
-        elif len(parts) >= 3:  # /싣고받고 출발지 도착지 (물품명은 선택사항)
+        # 기존 운송 요청 패턴: /싣고받고 출발지 도착지 물품명 [@수령자]
+        elif len(parts) >= 3:  # /싣고받고 출발지 도착지 (물품명, @수령자는 선택사항)
             from_text = parts[1]
             to_text = parts[2]
+
+            # @수령자 정보 추출
+            recipient = None
+            for part in parts[3:]:
+                if part.startswith('@'):
+                    recipient = part[1:]  # @ 제거
+                    break
     else:
         # 잔디 웹훅에서 data 필드로 오는 경우: "평촌 판교 센서"
         parts = message.strip().split()
@@ -274,13 +281,20 @@ def parse_chat_message(message):
     name_pattern = r'@?([A-Za-z]+)\([가-힣]+\)'
     names = re.findall(name_pattern, message)
 
+    # @수령자 정보 추출 (메시지 전체에서)
+    recipient = None
+    recipient_match = re.search(r'@([A-Za-z]+)', message)
+    if recipient_match:
+        recipient = recipient_match.group(1)
+
     return {
         'from_location': from_loc,
         'to_location': to_loc,
         'message_type': message_type,
         'names': names,
         'requester': requester,
-        'transporter': transporter
+        'transporter': transporter,
+        'recipient': recipient
     }
 
 def get_next_id(data):
@@ -443,11 +457,15 @@ def webhook():
             # 물품명 추출
             item = '물품'
 
-            # /싣고받고 형식의 경우 세 번째 파라미터가 물품명
+            # /싣고받고 형식의 경우 세 번째 파라미터가 물품명, 네 번째 이후에 @수령자 가능
             if message.strip().startswith('/싣고받고'):
                 parts = message.strip().split()
-                if len(parts) >= 4:  # /싣고받고 출발지 도착지 물품명
-                    item = parts[3]
+                if len(parts) >= 4:
+                    # @수령자가 아닌 첫 번째 항목이 물품명
+                    for part in parts[3:]:
+                        if not part.startswith('@'):
+                            item = part
+                            break
                 elif len(parts) == 3:  # 물품명이 없는 경우
                     item = '물품'
             else:
@@ -467,6 +485,7 @@ def webhook():
                 'from_location': parsed['from_location'],
                 'to_location': parsed['to_location'],
                 'item': item,
+                'recipient': parsed.get('recipient', ''),  # 수령자 정보 추가
                 'applicant_amount': applicant_points,
                 'transporter_amount': transporter_points,
                 'accumulate_date': '',
@@ -482,9 +501,10 @@ def webhook():
             save_data(data)
 
             # 잔디 알림 전송 (상세 포인트 정보)
+            recipient_info = f" → {parsed.get('recipient', '수령자')}" if parsed.get('recipient') else ""
             send_jandi_notification(
                 "✅ 접수완료",
-                f"📋 **#{new_record['id']}번** {parsed['from_location']}→{parsed['to_location']} {item} | 요청자 {applicant_points:,}P / 전달자 {transporter_points:,}P\n전달자를 기다립니다",
+                f"📋 **#{new_record['id']}번** {parsed['from_location']}→{parsed['to_location']} {item}{recipient_info} | 요청자 {applicant_points:,}P / 전달자 {transporter_points:,}P\n전달자를 기다립니다",
                 "#27ae60"
             )
 
@@ -579,9 +599,10 @@ def webhook():
                 save_data(data)
 
                 # 알림 전송
+                recipient_info = f" → {target_request.get('recipient', '수령자')}" if target_request.get('recipient') else ""
                 send_jandi_notification(
                     "✅ 접수완료!",
-                    f"🚛 **{sender}**님이 **#{request_id}번** 요청을 접수했습니다!\n📦 {target_request['from_location']}→{target_request['to_location']} {target_request['item']}\n배송을 시작해주세요!",
+                    f"🚛 **{sender}**님이 **#{request_id}번** 요청을 접수했습니다!\n📦 {target_request['from_location']}→{target_request['to_location']} {target_request['item']}{recipient_info}\n배송을 시작해주세요!",
                     "#27ae60"
                 )
 
@@ -617,9 +638,10 @@ def webhook():
                 save_data(data)
 
                 # 완료 알림
+                recipient_info = f" → {target_request.get('recipient', '수령자')}" if target_request.get('recipient') else ""
                 send_jandi_notification(
                     "🎉 운송완료!",
-                    f"✅ **#{request_id}번** 운송이 완료되었습니다!\n\n📦 {target_request['from_location']}→{target_request['to_location']} {target_request['item']}\n👤 요청자: {target_request['applicant']} (+{target_request['applicant_amount']:,}P)\n🚛 전달자: {target_request['transporter']} (+{target_request['transporter_amount']:,}P)\n\n포인트 적립 예정! 감사합니다! 🙏",
+                    f"✅ **#{request_id}번** 운송이 완료되었습니다!\n\n📦 {target_request['from_location']}→{target_request['to_location']} {target_request['item']}{recipient_info}\n👤 요청자: {target_request['applicant']} (+{target_request['applicant_amount']:,}P)\n🚛 전달자: {target_request['transporter']} (+{target_request['transporter_amount']:,}P)\n\n포인트 적립 예정! 감사합니다! 🙏",
                     "#27ae60"
                 )
 
