@@ -266,8 +266,8 @@ def parse_chat_message(message):
         message_type = 'request'
         # 요청자는 메시지 작성자 (웹훅에서 sender로 전달됨)
 
-    # 2. 전달 수락 메시지
-    elif any(keyword in message for keyword in ['접수', '신청']):
+    # 2. 전달 수락 메시지 (ID 기반이 아닌 경우만)
+    elif any(keyword in message for keyword in ['접수', '신청']) and not message.strip().startswith('/싣고받고'):
         message_type = 'accept'
         # 전달자는 메시지 작성자
 
@@ -533,7 +533,7 @@ def webhook():
                 # 잔디 알림 전송
                 send_jandi_notification(
                     "✅ 접수완료!",
-                    f"🚛 전달자: {sender}\n📦 요청: {latest_request['from_location']} → {latest_request['to_location']}\n물품: {latest_request['item']}\n\n배송을 시작해주세요!",
+                    f"🚛 전달자: {sender}\n📦 요청: {latest_request['from_location']} → {latest_request['to_location']} | 요청자 {latest_request['applicant_amount']:,}P / 전달자 {latest_request['transporter_amount']:,}P\n물품: {latest_request['item']}\n\n배송을 시작해주세요!",
                     "#27ae60"
                 )
 
@@ -597,7 +597,7 @@ def webhook():
                 recipient_info = f" → {target_request.get('recipient', '수령자')}" if target_request.get('recipient') else ""
                 send_jandi_notification(
                     "✅ 접수완료!",
-                    f"🚛 **{sender}**님이 **#{request_id}번** 요청을 접수했습니다!\n📦 {target_request['from_location']}→{target_request['to_location']} {target_request['item']}{recipient_info}\n배송을 시작해주세요!",
+                    f"🚛 **{sender}**님이 **#{request_id}번** 요청을 접수했습니다!\n📦 {target_request['from_location']}→{target_request['to_location']} {target_request['item']}{recipient_info} | 요청자 {target_request['applicant_amount']:,}P / 전달자 {target_request['transporter_amount']:,}P\n배송을 시작해주세요!",
                     "#27ae60"
                 )
 
