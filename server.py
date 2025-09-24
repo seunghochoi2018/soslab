@@ -447,10 +447,10 @@ def webhook():
             data.append(new_record)
             save_data(data)
 
-            # 잔디 알림 전송 (간단한 확인 메시지)
+            # 잔디 알림 전송 (상세 포인트 정보)
             send_jandi_notification(
                 "✅ 접수완료",
-                f"📋 **#{new_record['id']}번** {parsed['from_location']}→{parsed['to_location']} {item} | {applicant_points:,}P",
+                f"📋 **#{new_record['id']}번** {parsed['from_location']}→{parsed['to_location']} {item} | 요청자 {applicant_points:,}P / 전달자 {transporter_points:,}P\n전달자를 기다립니다",
                 "#27ae60"
             )
 
