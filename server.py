@@ -158,10 +158,44 @@ def parse_chat_message(message):
     from_text = None
     to_text = None
 
-    # 새로운 간단한 형식 처리: /싣고받고 [출발지] [도착지] [물품명] 또는 [출발지] [도착지] [물품명]
+    # /싣고받고 명령어 처리
     if message.strip().startswith('/싣고받고'):
         parts = message.strip().split()
-        if len(parts) >= 3:  # /싣고받고 출발지 도착지 (물품명은 선택사항)
+
+        # /싣고받고 접수 [번호] 패턴 확인
+        if len(parts) >= 3 and parts[1] == '접수':
+            try:
+                request_id = int(parts[2])
+                message_type = 'accept_id'
+                return {
+                    'message_type': message_type,
+                    'request_id': request_id,
+                    'from_location': None,
+                    'to_location': None,
+                    'requester': None,
+                    'transporter': None
+                }
+            except ValueError:
+                pass
+
+        # /싣고받고 완료 [번호] 패턴 확인
+        elif len(parts) >= 3 and parts[1] == '완료':
+            try:
+                request_id = int(parts[2])
+                message_type = 'complete_id'
+                return {
+                    'message_type': message_type,
+                    'request_id': request_id,
+                    'from_location': None,
+                    'to_location': None,
+                    'requester': None,
+                    'transporter': None
+                }
+            except ValueError:
+                pass
+
+        # 기존 운송 요청 패턴: /싣고받고 출발지 도착지 물품명
+        elif len(parts) >= 3:  # /싣고받고 출발지 도착지 (물품명은 선택사항)
             from_text = parts[1]
             to_text = parts[2]
     else:
@@ -522,12 +556,88 @@ def webhook():
             else:
                 return jsonify({'success': False, 'error': '진행중인 운송 요청이 없습니다.'})
 
+        # 4. ID 기반 접수 메시지: /싣고받고 접수 [번호]
+        elif parsed['message_type'] == 'accept_id':
+            request_id = parsed['request_id']
+
+            # 해당 ID의 대기중 요청 찾기
+            target_request = None
+            for record in data:
+                if record['id'] == request_id and record.get('status') == '대기중':
+                    target_request = record
+                    break
+
+            if target_request:
+                # 전달자 배정
+                for i, record in enumerate(data):
+                    if record['id'] == request_id:
+                        data[i]['transporter'] = sender
+                        data[i]['status'] = '진행중'
+                        data[i]['updated_at'] = datetime.now().isoformat()
+                        break
+
+                save_data(data)
+
+                # 알림 전송
+                send_jandi_notification(
+                    "✅ 접수완료!",
+                    f"🚛 **{sender}**님이 **#{request_id}번** 요청을 접수했습니다!\n📦 {target_request['from_location']}→{target_request['to_location']} {target_request['item']}\n배송을 시작해주세요!",
+                    "#27ae60"
+                )
+
+                return jsonify({'success': True, 'action': 'accepted_by_id', 'record': data[i]})
+            else:
+                send_jandi_notification(
+                    "❌ 접수 실패",
+                    f"#{request_id}번 요청을 찾을 수 없거나 이미 처리되었습니다.",
+                    "#e74c3c"
+                )
+                return jsonify({'success': False, 'error': f'{request_id}번 요청을 찾을 수 없습니다.'})
+
+        # 5. ID 기반 완료 메시지: /싣고받고 완료 [번호]
+        elif parsed['message_type'] == 'complete_id':
+            request_id = parsed['request_id']
+
+            # 해당 ID의 진행중 요청 찾기
+            target_request = None
+            for record in data:
+                if record['id'] == request_id and record.get('status') == '진행중':
+                    target_request = record
+                    break
+
+            if target_request:
+                # 완료 처리
+                for i, record in enumerate(data):
+                    if record['id'] == request_id:
+                        data[i]['status'] = '완료'
+                        data[i]['accumulate_date'] = datetime.now().strftime('%Y-%m-%d')
+                        data[i]['updated_at'] = datetime.now().isoformat()
+                        break
+
+                save_data(data)
+
+                # 완료 알림
+                send_jandi_notification(
+                    "🎉 운송완료!",
+                    f"✅ **#{request_id}번** 운송이 완료되었습니다!\n\n📦 {target_request['from_location']}→{target_request['to_location']} {target_request['item']}\n👤 요청자: {target_request['applicant']} (+{target_request['applicant_amount']:,}P)\n🚛 전달자: {target_request['transporter']} (+{target_request['transporter_amount']:,}P)\n\n포인트 적립 예정! 감사합니다! 🙏",
+                    "#27ae60"
+                )
+
+                return jsonify({'success': True, 'action': 'completed_by_id', 'record': data[i]})
+            else:
+                send_jandi_notification(
+                    "❌ 완료 실패",
+                    f"#{request_id}번 요청을 찾을 수 없거나 진행중 상태가 아닙니다.",
+                    "#e74c3c"
+                )
+                return jsonify({'success': False, 'error': f'{request_id}번 요청을 찾을 수 없습니다.'})
+
         else:
             # 양식 안내 메시지 전송
             if any(keyword in message for keyword in ['운송', '이송', '전달', '배송']):
                 send_jandi_notification(
                     "❓ 사용법",
-                    "**간단한 키워드로 사용하세요!**\n\n🚚 **운송 요청**: `/싣고받고 평촌 판교 센서`\n✅ **전달 수락**: `접수` (댓글로)\n✅ **완료 확인**: `완료`",
+                    "**ID 방식으로 사용하세요!**\n\n🚚 **운송 요청**: `/싣고받고 평촌 판교 센서`\n✅ **전달 수락**: `/싣고받고 접수 번호`\n✅ **완료 확인**: `/싣고받고 완료 번호`\n\n📝 **예시:**\n• `/싣고받고 접수 12`\n• `/싣고받고 완료 12`",
                     "#f39c12"
                 )
                 return jsonify({'success': False, 'error': '양식 안내를 전송했습니다.'})
