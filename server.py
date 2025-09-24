@@ -203,6 +203,11 @@ def parse_chat_message(message):
     if message.strip().startswith('/싣고받고') and from_loc and to_loc:
         message_type = 'request'
         # 요청자는 메시지 작성자 (웹훅에서 sender로 전달됨)
+    elif from_loc and to_loc:
+        # 잔디 웹훅에서 data 필드로 "평촌 판교 센서" 형태로 오는 경우
+        message_type = 'request'
+        print(f"[DEBUG] 잔디 웹훅 요청으로 인식: from_loc={from_loc}, to_loc={to_loc}")
+        # 요청자는 메시지 작성자 (웹훅에서 sender로 전달됨)
     elif any(keyword in message for keyword in ['이송 부탁', '전달 부탁', '전달 요청', '이동하시는 분', '운송 요청']):
         message_type = 'request'
         # 요청자는 메시지 작성자 (웹훅에서 sender로 전달됨)
