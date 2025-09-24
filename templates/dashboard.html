@@ -475,6 +475,7 @@
                         <th>전달자</th>
                         <th>경로</th>
                         <th>물품</th>
+                        <th>수령자</th>
                         <th>요청자P</th>
                         <th>전달자P</th>
                         <th>상태</th>
@@ -489,6 +490,7 @@
                         <td>{{ record.transporter or '-' }}</td>
                         <td>{{ record.from_location }} → {{ record.to_location }}</td>
                         <td>{{ record.item }}</td>
+                        <td>{{ record.recipient or '-' }}</td>
                         <td>{{ "{:,}".format(record.applicant_amount) }}</td>
                         <td>{{ "{:,}".format(record.transporter_amount) }}</td>
                         <td>
@@ -537,7 +539,7 @@
             tbody.innerHTML = '';
 
             if (records.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="no-data">검색 결과가 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="no-data">검색 결과가 없습니다.</td></tr>';
                 return;
             }
 
@@ -549,6 +551,7 @@
                     <td>${record.transporter || '-'}</td>
                     <td>${record.from_location} → ${record.to_location}</td>
                     <td>${record.item}</td>
+                    <td>${record.recipient || '-'}</td>
                     <td>${record.applicant_amount.toLocaleString()}</td>
                     <td>${record.transporter_amount.toLocaleString()}</td>
                     <td>

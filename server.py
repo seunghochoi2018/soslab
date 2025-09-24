@@ -204,11 +204,16 @@ def parse_chat_message(message):
             if len(parts) >= 5:  # /싣고받고 출발지 도착지 물품명 수령자
                 recipient = parts[4]
     else:
-        # 잔디 웹훅에서 data 필드로 오는 경우: "평촌 판교 센서"
+        # 잔디 웹훅에서 data 필드로 오는 경우: "평촌 판교 컴퓨터 안나"
         parts = message.strip().split()
-        if len(parts) >= 2:  # 출발지 도착지 (물품명은 선택사항)
+        if len(parts) >= 2:  # 출발지 도착지 (물품명, 수령자는 선택사항)
             from_text = parts[0]
             to_text = parts[1]
+
+            # 수령자 정보 추출 (4번째 파라미터)
+            recipient = None
+            if len(parts) >= 4:  # 출발지 도착지 물품명 수령자
+                recipient = parts[3]
 
     # 위치 정규화
     if from_text and to_text:
@@ -464,12 +469,17 @@ def webhook():
                 elif len(parts) == 3:  # 물품명이 없는 경우
                     item = '물품'
             else:
-                # 기존 방식: 패턴 매칭
-                item_patterns = ['센서', '박스', '노트북', 'ML-U', 'SL-U', '보드', '서버', '하드웨어']
-                for pattern in item_patterns:
-                    if pattern.lower() in message.lower():
-                        item = pattern
-                        break
+                # 잔디 웹훅에서 data 필드로 오는 경우: "평촌 판교 컴퓨터 안나"
+                parts = message.strip().split()
+                if len(parts) >= 3:
+                    item = parts[2]  # 세 번째 파라미터가 물품명
+                else:
+                    # 기존 방식: 패턴 매칭
+                    item_patterns = ['센서', '박스', '노트북', 'ML-U', 'SL-U', '보드', '서버', '하드웨어', '컴퓨터']
+                    for pattern in item_patterns:
+                        if pattern.lower() in message.lower():
+                            item = pattern
+                            break
 
             # 새 운송 요청 레코드 생성
             new_record = {
