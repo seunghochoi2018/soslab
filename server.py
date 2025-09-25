@@ -666,17 +666,7 @@ def webhook():
                 )
                 return jsonify({'success': False, 'error': '양식 안내를 전송했습니다.'})
             else:
-                # 메시지가 4개 단어로 구성되어 있다면 양식 안내 표시
-                parts = message.strip().split()
-                if len(parts) == 4:
-                    send_jandi_notification(
-                        "❓ 양식 확인",
-                        f"**입력된 내용:** `{message}`\n\n**해석:**\n• 출발지: {parts[0]}\n• 도착지: {parts[1]}\n• 물품: {parts[2] if len(parts) >= 3 else '미지정'}\n• 수령자: {parts[3] if len(parts) >= 4 else '미지정'}\n\n출발지/도착지가 인식되지 않으면 정확한 사무실명을 사용해주세요.",
-                        "#f39c12"
-                    )
-                    return jsonify({'success': False, 'error': '양식 확인 메시지를 전송했습니다.'})
-                else:
-                    return jsonify({'success': False, 'error': '인식할 수 없는 메시지 형식입니다.'})
+                return jsonify({'success': False, 'error': '인식할 수 없는 메시지 형식입니다.'})
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
