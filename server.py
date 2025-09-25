@@ -194,15 +194,15 @@ def parse_chat_message(message):
             except ValueError:
                 pass
 
-        # 기존 운송 요청 패턴: /싣고받고 출발지 도착지 물품명 [수령자]
-        elif len(parts) >= 3:  # /싣고받고 출발지 도착지 (물품명, 수령자는 선택사항)
+        # 운송 요청 패턴: /싣고받고 물품명 수령자 출발지 도착지
+        elif len(parts) >= 5:  # /싣고받고 물품명 수령자 출발지 도착지
+            from_text = parts[3]  # 출발지
+            to_text = parts[4]    # 도착지
+            recipient = parts[2]  # 수령자
+        elif len(parts) >= 3:  # 기존 방식 호환: /싣고받고 출발지 도착지
             from_text = parts[1]
             to_text = parts[2]
-
-            # 수령자 정보 추출 (@ 없이, 5번째 파라미터)
             recipient = None
-            if len(parts) >= 5:  # /싣고받고 출발지 도착지 물품명 수령자
-                recipient = parts[4]
     else:
         # 잔디 웹훅에서 data 필드로 오는 경우: 순서대로 인식 (첫번째 두번째는 출발지 도착지)
         parts = message.strip().split()
@@ -422,7 +422,7 @@ def webhook():
         print(f"[DEBUG] 파싱된 JSON: {webhook_data}")
 
         # 잔디 웹훅 데이터 구조에 맞게 수정
-        message = webhook_data.get('data', webhook_data.get('text', webhook_data.get('message', '')))
+        message = webhook_data.get('text', webhook_data.get('data', webhook_data.get('message', '')))
         sender = webhook_data.get('writerName', webhook_data.get('writer_name', webhook_data.get('sender', '익명')))
         timestamp = webhook_data.get('timestamp', datetime.now().isoformat())
 
@@ -458,12 +458,14 @@ def webhook():
             # 물품명 추출
             item = '물품'
 
-            # /싣고받고 형식의 경우: /싣고받고 출발지 도착지 물품명 [수령자]
+            # /싣고받고 형식의 경우: /싣고받고 물품명 수령자 출발지 도착지
             if message.strip().startswith('/싣고받고'):
                 parts = message.strip().split()
-                if len(parts) >= 4:
-                    item = parts[3]  # 세 번째 파라미터가 물품명
-                elif len(parts) == 3:  # 물품명이 없는 경우
+                if len(parts) >= 5:
+                    item = parts[1]  # 첫 번째 파라미터가 물품명
+                elif len(parts) >= 4:  # 기존 호환: /싣고받고 출발지 도착지 물품명
+                    item = parts[3]
+                else:
                     item = '물품'
             else:
                 # 잔디 웹훅에서 data 필드로 오는 경우: 순서대로 인식 (세번째가 물품명)
